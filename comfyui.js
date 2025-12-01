@@ -93,7 +93,7 @@ export class ComfyUI {
     getMonitoringData() {
         return this.monitoringData;
     }
-    resolveOutputData(output) {
+    resolveOutputData(nodeId, output) {
         const result = [];
         if (typeof output.images !== "undefined") {
             for (let img of output.images) {
@@ -103,14 +103,16 @@ export class ComfyUI {
                 params.set("type", img.type);
                 result.push({
                     type: "image",
-                    src: `http://${this.server}/view?` + params.toString()
+                    src: `http://${this.server}/view?` + params.toString(),
+                    nodeId: nodeId
                 });
             }
         }
         else if (typeof output.text !== "undefined") {
             result.push({
                 "type": "text",
-                "text": output.text.join("")
+                "text": output.text.join(""),
+                "nodeId": nodeId
             });
         }
         else if (typeof output.audio !== "undefined") {
@@ -121,7 +123,8 @@ export class ComfyUI {
                 params.set("type", audio.type);
                 result.push({
                     type: "audio",
-                    src: `http://${this.server}/view?` + params.toString()
+                    src: `http://${this.server}/view?` + params.toString(),
+                    nodeId: nodeId
                 });
             }
         }

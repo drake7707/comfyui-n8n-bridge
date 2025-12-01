@@ -81,7 +81,7 @@ app.delete('/upload/:filename', async (req, res) => {
     await fs.remove(filePath);
 
     console.log(`File deleted: ${filePath}`);
-    
+
     res.json({ message: 'File deleted successfully.' });
   } catch (err) {
     console.error(err);
@@ -136,7 +136,7 @@ app.post("/queue", async (req, res) => {
     for (const nodeId of Object.keys(result.outputs)) {
       const output = result.outputs[nodeId];
 
-      const resolvedOutput: any = comfyui.resolveOutputData(output);
+      const resolvedOutput: any = comfyui.resolveOutputData(nodeId,output);
       outputs.push(resolvedOutput);
     }
     await doCallback(data.callbackUrl, outputs)
@@ -259,7 +259,7 @@ async function processRequest(generatePromptTemplate: any, uploadResult: UploadR
     for (const nodeId of Object.keys(result.outputs)) {
       const output = result.outputs[nodeId];
 
-      const resolvedOutput: any = comfyui.resolveOutputData(output);
+      const resolvedOutput: any = comfyui.resolveOutputData(nodeId, output);
 
 
       outputs.push(resolvedOutput);

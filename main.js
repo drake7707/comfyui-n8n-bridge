@@ -101,7 +101,7 @@ app.post("/queue", async (req, res) => {
         const outputs = [];
         for (const nodeId of Object.keys(result.outputs)) {
             const output = result.outputs[nodeId];
-            const resolvedOutput = comfyui.resolveOutputData(output);
+            const resolvedOutput = comfyui.resolveOutputData(nodeId, output);
             outputs.push(resolvedOutput);
         }
         await doCallback(data.callbackUrl, outputs);
@@ -221,7 +221,7 @@ async function processRequest(generatePromptTemplate: any, uploadResult: UploadR
     for (const nodeId of Object.keys(result.outputs)) {
       const output = result.outputs[nodeId];
 
-      const resolvedOutput: any = comfyui.resolveOutputData(output);
+      const resolvedOutput: any = comfyui.resolveOutputData(nodeId, output);
 
 
       outputs.push(resolvedOutput);
