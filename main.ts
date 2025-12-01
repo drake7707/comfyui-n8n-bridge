@@ -136,8 +136,12 @@ app.post("/queue", async (req, res) => {
     for (const nodeId of Object.keys(result.outputs)) {
       const output = result.outputs[nodeId];
 
-      const resolvedOutput: any = comfyui.resolveOutputData(nodeId,output);
-      outputs.push(resolvedOutput);
+      const resolvedOutput: any = comfyui.resolveOutputData(nodeId, output);
+      if (resolvedOutput !== null) {
+        for (let o of resolvedOutput) {
+          outputs.push(o);
+        }
+      }
     }
     await doCallback(data.callbackUrl, outputs)
   }
