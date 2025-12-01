@@ -159,17 +159,6 @@ export class ComfyUI {
                     src: `http://${this.server}/view?` + params.toString()
                 })
             }
-        } else if (typeof output.audio !== "undefined") {
-            for (let audio of output.audio) {
-                const params = new URLSearchParams();
-                params.set("filename", audio.filename);
-                params.set("subfolder", audio.subfolder);
-                params.set("type", audio.type);
-                result.push({
-                    type: "audio",
-                    src: `http://${this.server}/view?` + params.toString()
-                })
-            }
         }
         return null;
     }
