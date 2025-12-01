@@ -143,6 +143,7 @@ app.post("/queue", async (req, res) => {
 });
 
 async function doCallback(callbackUrl: string, data: any) {
+  console.log("Doing callback to " + callbackUrl);
   try {
     const response = await fetch(callbackUrl, {
       method: "POST",
