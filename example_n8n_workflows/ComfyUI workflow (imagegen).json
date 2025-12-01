@@ -1,0 +1,247 @@
+{
+  "name": "ComfyUI workflow (imagegen)",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        272,
+        64
+      ],
+      "id": "d8fa3f0f-7240-4c99-b9a9-823a08fae37a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"3\": {\n    \"inputs\": {\n      \"seed\": 615068386348082,\n      \"steps\": 20,\n      \"cfg\": 8,\n      \"sampler_name\": \"euler\",\n      \"scheduler\": \"normal\",\n      \"denoise\": 1,\n      \"model\": [\n        \"4\",\n        0\n      ],\n      \"positive\": [\n        \"6\",\n        0\n      ],\n      \"negative\": [\n        \"7\",\n        0\n      ],\n      \"latent_image\": [\n        \"5\",\n        0\n      ]\n    },\n    \"class_type\": \"KSampler\",\n    \"_meta\": {\n      \"title\": \"KSampler\"\n    }\n  },\n  \"4\": {\n    \"inputs\": {\n      \"ckpt_name\": \"v1-5-realistic.safetensors\"\n    },\n    \"class_type\": \"CheckpointLoaderSimple\",\n    \"_meta\": {\n      \"title\": \"Load Checkpoint\"\n    }\n  },\n  \"5\": {\n    \"inputs\": {\n      \"width\": 512,\n      \"height\": 512,\n      \"batch_size\": 4\n    },\n    \"class_type\": \"EmptyLatentImage\",\n    \"_meta\": {\n      \"title\": \"Empty Latent Image\"\n    }\n  },\n  \"6\": {\n    \"inputs\": {\n      \"text\": \"beautiful scenery nature glass bottle landscape, , purple galaxy bottle,\",\n      \"clip\": [\n        \"4\",\n        1\n      ]\n    },\n    \"class_type\": \"CLIPTextEncode\",\n    \"_meta\": {\n      \"title\": \"CLIP Text Encode (Prompt)\"\n    }\n  },\n  \"7\": {\n    \"inputs\": {\n      \"text\": \"text, watermark\",\n      \"clip\": [\n        \"4\",\n        1\n      ]\n    },\n    \"class_type\": \"CLIPTextEncode\",\n    \"_meta\": {\n      \"title\": \"CLIP Text Encode (Prompt)\"\n    }\n  },\n  \"8\": {\n    \"inputs\": {\n      \"samples\": [\n        \"3\",\n        0\n      ],\n      \"vae\": [\n        \"4\",\n        2\n      ]\n    },\n    \"class_type\": \"VAEDecode\",\n    \"_meta\": {\n      \"title\": \"VAE Decode\"\n    }\n  },\n  \"10\": {\n    \"inputs\": {\n      \"images\": [\n        \"8\",\n        0\n      ]\n    },\n    \"class_type\": \"PreviewImage\",\n    \"_meta\": {\n      \"title\": \"Preview Image\"\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        544,
+        64
+      ],
+      "id": "797b3c6c-8fd1-4570-b98d-144cf6df292f",
+      "name": "Build ComfyUI workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://172.20.50.213:8190/queue",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"workflow\": {{ JSON.stringify($json) }},\n\"callbackUrl\": \"{{$execution.resumeUrl}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        816,
+        64
+      ],
+      "id": "6c0f6edd-e74d-467d-ab3b-47349c686175",
+      "name": "Queue ComfyUI workflow"
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "httpMethod": "POST",
+        "limitWaitTime": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        64
+      ],
+      "id": "b326b885-00d1-4991-be4b-82d5285c8e1d",
+      "name": "Wait",
+      "webhookId": "7bb2b433-4203-49d5-8a12-a97b8361e5eb"
+    },
+    {
+      "parameters": {
+        "content": "## ComfyUI example workflow\n\nThis initial workflow you can obtain by exporting a workflow in ComfYUI -> Export API.\n\nFinally it waits until the workflow is executed. The API expects a callbackUrl it will call with the result once the execution is finished which is provided by the Wait node.\n\nIt splits out the result and downloads the files",
+        "height": 224,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        928,
+        272
+      ],
+      "id": "4c217813-a46c-4af3-a1f6-88092fa0b581",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.src }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1808,
+        48
+      ],
+      "id": "f062c705-da3e-4fc4-a66d-34e592e71310",
+      "name": "Download result"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        64
+      ],
+      "id": "94addc25-c2dc-4898-b580-b48a23417737",
+      "name": "Split out results"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8c227c2e-af27-4799-86ee-9f286e74b3e8",
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "image",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1520,
+        64
+      ],
+      "id": "7beb537f-93ca-4753-8f9d-fbdfc50ea3c1",
+      "name": "If output item is an image"
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "=http://172.20.50.213:8190/download/{{$json.filename}}?subfolder={{$json.subfolder}}&filetype={{$json.filetype}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1808,
+        272
+      ],
+      "id": "cb3a9e48-fa36-4198-8942-f5fd7e14dd63",
+      "name": "Delete output files from ComfyUI"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Build ComfyUI workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build ComfyUI workflow": {
+      "main": [
+        [
+          {
+            "node": "Queue ComfyUI workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Queue ComfyUI workflow": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Split out results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split out results": {
+      "main": [
+        [
+          {
+            "node": "If output item is an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If output item is an image": {
+      "main": [
+        [
+          {
+            "node": "Download result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download result": {
+      "main": [
+        [
+          {
+            "node": "Delete output files from ComfyUI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9df4e4cc-105f-4ac7-8312-fc8c8ffdd98a",
+  "meta": {
+    "instanceId": "6e07c524caae010c5a5ae671d24656b8a966f61b0fee7a9ce5e13c5bfa536e31"
+  },
+  "id": "nlfgMuacwFSrQygo",
+  "tags": []
+}

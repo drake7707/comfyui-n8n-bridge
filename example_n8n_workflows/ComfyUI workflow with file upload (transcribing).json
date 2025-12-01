@@ -1,0 +1,272 @@
+{
+  "name": "ComfyUI workflow with file upload (transcribing)",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        64
+      ],
+      "id": "4ef479fd-7983-4b12-a329-51ccf79f38f0",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "http://172.20.50.213:8190/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "attachment",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        256,
+        64
+      ],
+      "id": "9fa69fdc-a0a3-4236-8f6e-f1425e8f9b58",
+      "name": "Upload to ComfyUI"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"10\": {\n    \"inputs\": {\n      \"model_type\": \"large-v3\",\n      \"batch_size\": 4,\n      \"if_mutiple_speaker\": true,\n      \"use_auth_token\": \"\",\n      \"if_translate\": false,\n      \"translator\": \"alibaba\",\n      \"to_language\": \"en\",\n      \"audio\": [\n        \"76\",\n        0\n      ]\n    },\n    \"class_type\": \"WhisperX\",\n    \"_meta\": {\n      \"title\": \"WhisperX Node\"\n    }\n  },\n  \"40\": {\n    \"inputs\": {\n      \"srt\": [\n        \"10\",\n        0\n      ]\n    },\n    \"class_type\": \"SRTToString\",\n    \"_meta\": {\n      \"title\": \"SRT to String\"\n    }\n  },\n  \"76\": {\n    \"inputs\": {\n      \"audio\": \"{{$json.filename}}\",\n      \"choose audio file to upload\": \"Audio\"\n    },\n    \"class_type\": \"LoadAudioVideoPath\",\n    \"_meta\": {\n      \"title\": \"LoadAudioVideoPath\"\n    }\n  },\n  \"78\": {\n    \"inputs\": {\n      \"text\": \"\",\n      \"anything\": [\n        \"40\",\n        0\n      ]\n    },\n    \"class_type\": \"easy showAnything\",\n    \"_meta\": {\n      \"title\": \"Show Any\"\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        64
+      ],
+      "id": "96e071fc-c5e9-4043-bd96-f20897d9dd12",
+      "name": "Build ComfyUI workflow"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/vlaams_snippet.mp3",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        64
+      ],
+      "id": "6ac91bb8-40bf-4adc-89de-10b9849dda60",
+      "name": "Read example file from disk"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://172.20.50.213:8190/queue",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"workflow\": {{ JSON.stringify($json) }},\n\"callbackUrl\": \"{{$execution.resumeUrl}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        816,
+        64
+      ],
+      "id": "16a6923b-a903-417a-a15e-40d5ff306fd2",
+      "name": "Queue ComfyUI workflow"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1264,
+        336
+      ],
+      "id": "4a5bb303-9964-45ae-8ab0-18e8c1c74482",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "httpMethod": "POST",
+        "limitWaitTime": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        64
+      ],
+      "id": "365f4da4-c14a-453f-a5cd-14337a73ccf1",
+      "name": "Wait",
+      "webhookId": "9251c680-956f-42ca-a8c2-e1ce8e9c20e6"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "body[0].text",
+        "binaryPropertyName": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        64
+      ],
+      "id": "1fe4fbf6-8fe3-4936-baf9-3fae8992dcd3",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "content": "## ComfyUI example workflow with an input file\n\nThe workflow uploads a file to the comfyUI input folder and gets a random filename in return.\n\nThen it builds the workflow json that needs to run (and substitutes in the filename). This initial workflow you can obtain by exporting a workflow in ComfYUI -> Export API.\n\nFinally it waits until the workflow is executed. The API expects a callbackUrl it will call with the result once the execution is finished which is provided by the Wait node.\n\nIt then proceeds with the output and finally deletes the uploaded file from ComfyUI input folder\n",
+        "height": 320,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        336
+      ],
+      "id": "c961cfad-8a8e-4e30-8900-7eb3b41738fb",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "DELETE",
+        "url": "=http://172.20.50.213:8190/upload/{{$json.filename}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1536,
+        336
+      ],
+      "id": "e173356f-30cc-49c2-88ea-980ad8bfbf0b",
+      "name": "Delete input file from ComfyUI"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read example file from disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to ComfyUI": {
+      "main": [
+        [
+          {
+            "node": "Build ComfyUI workflow",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build ComfyUI workflow": {
+      "main": [
+        [
+          {
+            "node": "Queue ComfyUI workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read example file from disk": {
+      "main": [
+        [
+          {
+            "node": "Upload to ComfyUI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Delete input file from ComfyUI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Queue ComfyUI workflow": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6eb85cb7-57cc-41ee-891b-50c37d0036c8",
+  "meta": {
+    "instanceId": "6e07c524caae010c5a5ae671d24656b8a966f61b0fee7a9ce5e13c5bfa536e31"
+  },
+  "id": "IKvbxVvIuxgRKwZ3",
+  "tags": []
+}
