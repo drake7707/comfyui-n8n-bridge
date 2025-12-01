@@ -1,3 +1,4 @@
+import WebSocket from 'ws';
 
 export interface PromptEntry {
     id: string;
@@ -223,9 +224,8 @@ export class ComfyUI {
                 nodesExecuted: [],
                 progress: 0
             }
-            
             this.registeredPrompts[promptId] = <any>entry;
-
+            onUpdate(entry);
 
         });
         return promiseResult;

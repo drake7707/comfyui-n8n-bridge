@@ -1,3 +1,4 @@
+import WebSocket from 'ws';
 export class ComfyUI {
     constructor(clientId, server) {
         this.clientId = clientId;
@@ -173,6 +174,7 @@ export class ComfyUI {
                 progress: 0
             };
             this.registeredPrompts[promptId] = entry;
+            onUpdate(entry);
         });
         return promiseResult;
     }
@@ -200,3 +202,4 @@ export class ComfyUI {
         }
     }
 }
+//# sourceMappingURL=comfyui.js.map

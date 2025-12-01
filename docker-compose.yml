@@ -1,0 +1,22 @@
+services:
+
+  web:
+    container_name: comfyui-n8n-bridge
+    image: ucll/comfyui-n8n-bridge
+    build:
+      context: ./
+      dockerfile: Dockerfile
+
+    volumes:
+      - /data/comfyui-docker/data_dev/input:/upload
+    
+    restart: unless-stopped
+
+    ports:
+      - 8190:8190
+
+    environment:
+      - PORT=8190 
+      - COMFYUI_HOST=172.20.50.213:8189
+      - COMFYUI_UPLOAD_PATH=/upload
+      - TEMP_UPLOAD_PATH=/tmp
