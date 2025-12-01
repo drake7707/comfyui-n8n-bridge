@@ -28,6 +28,7 @@ app.put('/upload', upload.any(), async (req, res) => {
             const newFilename = randomUUID() + ext;
             const destPath = path.join(uploadDir, newFilename);
             await fs.move(file.path, destPath, { overwrite: false });
+            console.log(`File uploaded: ${destPath}`);
             res.json({
                 filename: newFilename,
                 message: 'File uploaded successfully.'
@@ -58,6 +59,7 @@ app.delete('/upload/:filename', async (req, res) => {
             return res.status(404).json({ error: 'File not found.' });
         }
         await fs.remove(filePath);
+        console.log(`File deleted: ${filePath}`);
         res.json({ message: 'File deleted successfully.' });
     }
     catch (err) {

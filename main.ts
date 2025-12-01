@@ -42,6 +42,8 @@ app.put('/upload', upload.any(), async (req: any, res: any) => {
 
       await fs.move(file.path, destPath, { overwrite: false });
 
+      console.log(`File uploaded: ${destPath}`);
+
       res.json({
         filename: newFilename,
         message: 'File uploaded successfully.'
@@ -77,6 +79,9 @@ app.delete('/upload/:filename', async (req, res) => {
     }
 
     await fs.remove(filePath);
+
+    console.log(`File deleted: ${filePath}`);
+    
     res.json({ message: 'File deleted successfully.' });
   } catch (err) {
     console.error(err);
