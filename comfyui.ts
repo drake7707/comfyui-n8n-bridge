@@ -147,7 +147,10 @@ export class ComfyUI {
                 result.push({
                     type: "image",
                     src: `http://${this.server}/view?` + params.toString(),
-                    nodeId: nodeId
+                    nodeId: nodeId,
+                    filename: img.filename,
+                    subfolder: img.subfolder,
+                    filetype: img.type
                 })
             }
         } else if (typeof output.text !== "undefined") {
@@ -165,7 +168,10 @@ export class ComfyUI {
                 result.push({
                     type: "audio",
                     src: `http://${this.server}/view?` + params.toString(),
-                    nodeId: nodeId
+                    nodeId: nodeId,
+                    filename: audio.filename,
+                    subfolder: audio.subfolder,
+                    filetype: audio.type
                 })
             }
         }

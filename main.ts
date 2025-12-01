@@ -21,7 +21,7 @@ const upload = multer({
 });
 
 fs.ensureDirSync(<string>process.env.TEMP_UPLOAD_PATH);
-fs.ensureDirSync(<string>process.env.COMFYUI_UPLOAD_PATH);
+fs.ensureDirSync(<string>process.env.COMFYUI_INPUT_PATH);
 
 const server = <string>process.env.COMFYUI_HOST;
 const comfyui = new ComfyUI("n8n", server);
@@ -31,7 +31,7 @@ app.put('/upload', upload.any(), async (req: any, res: any) => {
   try {
     const file = req.files[0];
     if (file) {
-      const uploadDir = process.env.COMFYUI_UPLOAD_PATH as string;
+      const uploadDir = process.env.COMFYUI_INPUT_PATH as string;
 
       // Extract original extension
       const ext = path.extname(file.originalname); // e.g., ".mp3"
@@ -67,9 +67,48 @@ app.delete('/upload/:filename', async (req, res) => {
   }
 
   // Resolve the full path
-  const uploadDir = process.env.COMFYUI_UPLOAD_PATH as string;
+  const uploadDir = process.env.COMFYUI_INPUT_PATH as string;
   const filePath = path.join(uploadDir, filename);
 
+
+  try {
+    // Check if file exists before deleting
+    const exists = await fs.pathExists(filePath);
+    if (!exists) {
+      return res.status(404).json({ error: 'File not found.' });
+    }
+
+    await fs.remove(filePath);
+
+    console.log(`File deleted: ${filePath}`);
+
+    res.json({ message: 'File deleted successfully.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'File deletion error.' });
+  }
+});
+
+app.delete('/download/:filename', async (req, res) => {
+  const filename = req.params.filename;
+  const subfolder = req.query.subfolder as string || '';
+  const filetype = req.query.filetype as string || '';
+
+  // Reject filenames with directory traversal
+  if (filename.includes('..') || path.isAbsolute(filename)) {
+    return res.status(400).json({ error: 'Invalid filename.' });
+  }
+
+  let filePath: string;
+  if (filetype === "temp") {
+    // Resolve the full path
+    const outputDir = process.env.COMFYUI_TEMP_PATH as string;
+    filePath = path.join(outputDir, subfolder, filename);
+  } else {
+    // Resolve the full path
+    const outputDir = process.env.COMFYUI_OUTPUT_PATH as string;
+    filePath = path.join(outputDir, subfolder, filename);
+  }
 
   try {
     // Check if file exists before deleting
