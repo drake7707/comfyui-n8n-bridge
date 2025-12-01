@@ -9,7 +9,7 @@ export interface PromptEntry {
     onFinish: () => void;
     outputs: { [key: string]: any }
 
-    activeNode: string|null;
+    activeNode: string | null;
     nodesExecuted: string[];
     nodesToExecute: string[];
     progress: number;
@@ -30,7 +30,7 @@ export class ComfyUI {
 
     private monitoringData: any;
 
-    constructor(private clientId:string, private server: string) {
+    constructor(private clientId: string, private server: string) {
 
     }
 
@@ -118,7 +118,7 @@ export class ComfyUI {
     }
 
     disconnect() {
-        if(this.ws != null) {
+        if (this.ws != null) {
             this.ws.close();
             this.ws = null;
         }
@@ -128,7 +128,7 @@ export class ComfyUI {
         return this.monitoringData;
     }
 
-    resolveOutputData(output:any) {
+    resolveOutputData(output: any) {
         const result = [];
 
         if (typeof output.images !== "undefined") {
@@ -148,12 +148,33 @@ export class ComfyUI {
                 "type": "text",
                 "text": (<string[]>output.text).join("")
             }];
+        } else if (typeof output.audio !== "undefined") {
+            for (let audio of output.audio) {
+                const params = new URLSearchParams();
+                params.set("filename", audio.filename);
+                params.set("subfolder", audio.subfolder);
+                params.set("type", audio.type);
+                result.push({
+                    type: "audio",
+                    src: `http://${this.server}/view?` + params.toString()
+                })
+            }
+        } else if (typeof output.audio !== "undefined") {
+            for (let audio of output.audio) {
+                const params = new URLSearchParams();
+                params.set("filename", audio.filename);
+                params.set("subfolder", audio.subfolder);
+                params.set("type", audio.type);
+                result.push({
+                    type: "audio",
+                    src: `http://${this.server}/view?` + params.toString()
+                })
+            }
         }
-
         return null;
     }
 
-    async queue(prompt: any, onUpdate: (entry:PromptEntry) => void) {
+    async queue(prompt: any, onUpdate: (entry: PromptEntry) => void) {
         const result = await fetch(`http://${this.server}/prompt`, <any>{
             method: 'POST',
             headers: {
@@ -185,7 +206,7 @@ export class ComfyUI {
 
             //console.log(`Request registered with prompt id ${promptId}`);
 
-            const outputs:any = {};
+            const outputs: any = {};
             const entry: PromptEntry = {
                 id: promptId,
                 status: 'queued',
@@ -196,11 +217,11 @@ export class ComfyUI {
                 },
                 onNodeExecuting: (nodeId) => {
                     entry.status = "executing";
-                    
+
                     entry.activeNode = nodeId
 
                     entry.nodesExecuted.push(nodeId);
-                    entry.nodesToExecute.splice(entry.nodesToExecute.indexOf(nodeId),1);
+                    entry.nodesToExecute.splice(entry.nodesToExecute.indexOf(nodeId), 1);
                     entry.progress = entry.nodesExecuted.length / (entry.nodesExecuted.length + entry.nodesToExecute.length);
 
                     onUpdate(entry);
@@ -236,7 +257,7 @@ export class ComfyUI {
         const formData = new FormData();
         formData.append("image", file);
         //formData.append("subfolder", "connector_uploads");
-       
+
         try {
             const response = await fetch(`http://${this.server}/api/upload/image`, {
                 method: "POST",
