@@ -128,6 +128,13 @@ export class ComfyUI {
         return this.monitoringData;
     }
 
+    getStatus() {
+        return {
+            registeredPrompts: JSON.parse(JSON.stringify(this.registeredPrompts)),
+            connected: this.connected
+        }
+    }
+
     resolveOutputData(nodeId:string, output: any) {
         const result = [];
 

@@ -93,6 +93,12 @@ export class ComfyUI {
     getMonitoringData() {
         return this.monitoringData;
     }
+    getStatus() {
+        return {
+            registeredPrompts: JSON.parse(JSON.stringify(this.registeredPrompts)),
+            connected: this.connected
+        };
+    }
     resolveOutputData(nodeId, output) {
         const result = [];
         if (typeof output.images !== "undefined") {
