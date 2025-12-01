@@ -7,7 +7,7 @@ import multer from 'multer';
 import { randomUUID } from 'crypto';
 dotenv.config();
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 // Multer setup
 const upload = multer({
     limits: { fileSize: 1024 * 1024 * 1024 },
