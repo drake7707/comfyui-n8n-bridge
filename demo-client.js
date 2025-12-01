@@ -44,69 +44,63 @@ async function deleteFile(filename) {
 }
 async function runDemo() {
     try {
-        const filePath = path.resolve('./vlaams_snippet.mp3'); // your test file
+        //  const filePath = path.resolve('./vlaams_snippet.mp3'); // your test file
         // 1️⃣ Upload the file
-        const uploadedFilename = await uploadFile(filePath);
+        //    const uploadedFilename = await uploadFile(filePath);
         // 2️⃣ Queue a workflow (demo workflow referencing the uploaded file)
         const demoWorkflow = {
-            "10": {
+            "11": {
                 "inputs": {
-                    "model_type": "large-v3",
-                    "batch_size": 4,
-                    "if_mutiple_speaker": true,
-                    "use_auth_token": "",
-                    "if_translate": false,
-                    "translator": "alibaba",
-                    "to_language": "en",
+                    "text": "Dit is een test",
+                    "model": "VibeVoice7b-low-vram",
+                    "attention_type": "auto",
+                    "quantize_llm": "full precision",
+                    "free_memory_after_generate": true,
+                    "diffusion_steps": 10,
+                    "seed": 3523606388,
+                    "cfg_scale": 1.3,
+                    "use_sampling": false,
+                    "temperature": 0.95,
+                    "top_p": 0.95,
+                    "max_words_per_chunk": 250,
+                    "voice_speed_factor": 1,
+                    "voice_to_clone": [
+                        "13",
+                        0
+                    ]
+                },
+                "class_type": "VibeVoiceSingleSpeakerNode",
+                "_meta": {
+                    "title": "VibeVoice Single Speaker"
+                }
+            },
+            "12": {
+                "inputs": {
+                    "audioUI": "",
                     "audio": [
-                        "76",
+                        "11",
                         0
                     ]
                 },
-                "class_type": "WhisperX",
+                "class_type": "PreviewAudio",
                 "_meta": {
-                    "title": "WhisperX Node"
+                    "title": "Preview Audio"
                 }
             },
-            "40": {
-                "inputs": {
-                    "srt": [
-                        "10",
-                        0
-                    ]
-                },
-                "class_type": "SRTToString",
-                "_meta": {
-                    "title": "SRT to String"
-                }
-            },
-            "76": {
+            "13": {
                 "inputs": {
                     "audio": "vlaams_snippet.mp3",
-                    "choose audio file to upload": "Audio"
+                    "audioUI": ""
                 },
-                "class_type": "LoadAudioVideoPath",
+                "class_type": "LoadAudio",
                 "_meta": {
-                    "title": "LoadAudioVideoPath"
-                }
-            },
-            "78": {
-                "inputs": {
-                    "text": "",
-                    "anything": [
-                        "40",
-                        0
-                    ]
-                },
-                "class_type": "easy showAnything",
-                "_meta": {
-                    "title": "Show Any"
+                    "title": "Load Audio"
                 }
             }
         };
         await queueWorkflow(demoWorkflow, "http://172.20.50.213:5678/webhook/1552bb05-82e5-4ccc-bb05-aa173889c3fc");
         // 3️⃣ Delete the uploaded file
-        await deleteFile(uploadedFilename);
+        //     await deleteFile(uploadedFilename);
         console.log('Demo complete.');
     }
     catch (err) {

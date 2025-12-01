@@ -142,12 +142,11 @@ export class ComfyUI {
                     src: `http://${this.server}/view?` + params.toString()
                 })
             }
-            return result;
         } else if (typeof output.text !== "undefined") {
-            return [{
+            result.push({
                 "type": "text",
                 "text": (<string[]>output.text).join("")
-            }];
+            });
         } else if (typeof output.audio !== "undefined") {
             for (let audio of output.audio) {
                 const params = new URLSearchParams();
@@ -160,7 +159,10 @@ export class ComfyUI {
                 })
             }
         }
-        return null;
+        if(result.length == 0)
+            return null;
+        else
+            return result;
     }
 
     async queue(prompt: any, onUpdate: (entry: PromptEntry) => void) {

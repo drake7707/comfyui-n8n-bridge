@@ -106,13 +106,12 @@ export class ComfyUI {
                     src: `http://${this.server}/view?` + params.toString()
                 });
             }
-            return result;
         }
         else if (typeof output.text !== "undefined") {
-            return [{
-                    "type": "text",
-                    "text": output.text.join("")
-                }];
+            result.push({
+                "type": "text",
+                "text": output.text.join("")
+            });
         }
         else if (typeof output.audio !== "undefined") {
             for (let audio of output.audio) {
@@ -126,7 +125,10 @@ export class ComfyUI {
                 });
             }
         }
-        return null;
+        if (result.length == 0)
+            return null;
+        else
+            return result;
     }
     async queue(prompt, onUpdate) {
         const result = await fetch(`http://${this.server}/prompt`, {
