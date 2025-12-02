@@ -185,7 +185,7 @@ app.post("/queue", async (req, res) => {
           // it's mapped in different containers
           if (o.filetype === "output") {
             const basePath = <string>process.env.COMFYUI_OUTPUT_BASE_PATH;
-            if (o.subfolder.startswith(basePath))
+            if (o.subfolder.startsWith(basePath))
               o.subfolder = o.subfolder.substring(basePath.length);
           }
           outputs.push(o);
