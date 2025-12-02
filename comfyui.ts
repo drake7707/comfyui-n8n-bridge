@@ -137,6 +137,9 @@ export class ComfyUI {
     }
 
     resolveOutputData(nodeId: string, output: any) {
+        if(output == null)
+            return null;
+        
         const result = [];
 
         if (typeof output.images !== "undefined") {
