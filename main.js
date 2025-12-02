@@ -138,6 +138,15 @@ app.post("/queue", async (req, res) => {
             const resolvedOutput = comfyui.resolveOutputData(nodeId, output);
             if (resolvedOutput !== null) {
                 for (let o of resolvedOutput) {
+                    // remove the absolute path from subfolder to make it relative
+                    // so the file delete actually works
+                    // note that the  COMFYUI_OUTPUT_BASE_PATH is likely different from COMFYUI_OUTPUT_PATH because
+                    // it's mapped in different containers
+                    if (o.filetype === "output") {
+                        const basePath = process.env.COMFYUI_OUTPUT_BASE_PATH;
+                        if (o.subfolder.startswith(basePath))
+                            o.subfolder = o.subfolder.substring(basePath.length);
+                    }
                     outputs.push(o);
                 }
             }

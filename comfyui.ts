@@ -131,11 +131,12 @@ export class ComfyUI {
     getStatus() {
         return {
             registeredPrompts: JSON.parse(JSON.stringify(this.registeredPrompts)),
+            monitoring: this.getMonitoringData(),
             connected: this.connected
         }
     }
 
-    resolveOutputData(nodeId:string, output: any) {
+    resolveOutputData(nodeId: string, output: any) {
         const result = [];
 
         if (typeof output.images !== "undefined") {
@@ -174,8 +175,28 @@ export class ComfyUI {
                     filetype: audio.type
                 })
             }
+        } else if (typeof output.result !== "undefined") {
+            if ((output.result[0] + "").toLowerCase().endsWith(".glb")) {
+                const path = output.result[0];
+                const pathParts = path.split('/');
+                const filename = pathParts.pop();
+                const subfolder = pathParts.join('/');
+                const params = new URLSearchParams();
+                params.set("filename", filename);
+                params.set("subfolder", subfolder);
+                params.set("type", "output");
+                result.push({
+                    type: "3dmodel",
+                    src: `http://${this.server}/api/view?` + params.toString(),
+                    nodeId: nodeId,
+                    filename: filename,
+                    subfolder: subfolder,
+                    filetype: "output"
+                });
+            }
         }
-        if(result.length == 0)
+
+        if (result.length == 0)
             return null;
         else
             return result;
