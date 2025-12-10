@@ -4,6 +4,8 @@ COPY . /app
 
 WORKDIR /app
 
+RUN apk add --no-cache curl
+
 RUN npm install
 
 CMD node main.js
