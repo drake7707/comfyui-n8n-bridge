@@ -3,8 +3,12 @@ import express from 'express';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs-extra';
+import * as nodefs from 'node:fs';
 import multer from 'multer';
 import { randomUUID } from 'crypto';
+
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yaml';
 
 dotenv.config();
 
@@ -26,6 +30,10 @@ fs.ensureDirSync(<string>process.env.COMFYUI_INPUT_PATH);
 const server = <string>process.env.COMFYUI_HOST;
 const comfyui = new ComfyUI("n8n", server);
 
+
+const openapiFile = nodefs.readFileSync('./openapi.yaml', 'utf8');
+const openapiDocument = YAML.parse(openapiFile);
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapiDocument));
 
 app.put('/upload', upload.any(), async (req: any, res: any) => {
   try {
