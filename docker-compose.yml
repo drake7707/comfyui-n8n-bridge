@@ -24,6 +24,7 @@ services:
       - COMFYUI_TEMP_PATH=/temp
       - TEMP_UPLOAD_PATH=/tmp
       - COMFYUI_OUTPUT_BASE_PATH=/comfyui/output/
+      - COMFYUI_BASE_URL=https://comfyui.ucll.drakarah.be/
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8190/status"]

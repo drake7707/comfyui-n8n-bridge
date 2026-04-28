@@ -196,6 +196,11 @@ app.post("/queue", async (req, res) => {
             if (o.subfolder.startsWith(basePath))
               o.subfolder = o.subfolder.substring(basePath.length);
           }
+
+          if(o.src && process.env.COMFYUI_BASE_URL) {
+              o.src = o.src.replaceAll(`http://${server}/`, process.env.COMFYUI_BASE_URL);
+          }
+
           outputs.push(o);
         }
       }
